@@ -4,49 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Match</title>
+    <!-- Tailwind CSS CDN for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Import a font from Google Fonts. This must be the first rule in the style block. */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        
         body {
             font-family: 'Inter', sans-serif;
             background-color: #1a202c;
             color: #e2e8f0;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 1rem;
         }
+
+        .game-grid {
+            display: grid;
+            gap: 1rem;
+            max-width: 600px;
+            margin: 2rem auto;
+            justify-content: center;
+        }
         
+        /* The game card container */
         .game-card {
             width: 100px;
             height: 100px;
-            background-color: #2d3748;
+            background-color: transparent;
             border-radius: 1.5rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 3rem;
             cursor: pointer;
-            transform-style: preserve-3d;
-            transform: rotateY(180deg);
-            transition: transform 0.5s, background-color 0.3s;
+            transition: transform 0.5s;
             position: relative;
+            transform-style: preserve-3d;
         }
 
+        /* The flipped state for the whole card */
         .game-card.flipped {
-            transform: rotateY(0deg);
+            transform: rotateY(180deg);
         }
 
-        .game-card.matched {
-            background-color: #38a169;
-            cursor: default;
-        }
-        
-        .game-card.no-match {
-            background-color: #e53e3e; /* Red color for no-match */
-        }
-        
+        /* Front and back of the card */
         .card-front, .card-back {
             position: absolute;
             width: 100%;
@@ -59,21 +60,26 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
 
+        /* Styling for the card back */
         .card-back {
             background-color: #4a5568;
-            transform: rotateY(180deg);
-        }
-
-        .card-front {
-            background-color: #4a5568;
-            font-size: 3rem;
             transform: rotateY(0deg);
         }
-
-        .game-grid {
-            display: grid;
-            gap: 1rem;
-            justify-content-center;
+        
+        /* Styling for the card front */
+        .card-front {
+            background-color: #2d3748;
+            font-size: 3rem;
+            transform: rotateY(180deg);
+        }
+        
+        /* Matched cards */
+        .game-card.matched .card-front {
+            background-color: #38a169;
+        }
+        
+        .game-card.no-match .card-front {
+            background-color: #e53e3e; /* Red for no match */
         }
 
         /* Responsive grid adjustments */
@@ -84,7 +90,7 @@
                 font-size: 2rem;
             }
         }
-
+        
         /* Modal styling */
         .modal {
             display: none;
@@ -98,7 +104,7 @@
             justify-content: center;
             align-items: center;
         }
-
+        
         .modal-content {
             background-color: #2d3748;
             padding: 2.5rem;
@@ -164,7 +170,7 @@
     </div>
 
     <div class="mt-8 text-center text-gray-400 text-sm">
-        <p>&copy; 2024 Memory Match Game. Anshika Srivastava.All rights reserved.</p>
+        <p>&copy; 2024 Memory Match Game. Anshika Srivastava. All rights reserved.</p>
     </div>
 
     <script>
@@ -190,33 +196,33 @@
 
         // Level configurations with unique themes and emojis
         const levelConfigs = [
-            { topic: 'Animals', pairs: 4, size: 4, emojis: ['🐶', '🐱', '🦁', '🐸'] },
-            { topic: 'Fruits', pairs: 6, size: 4, emojis: ['🍏', '🍎', '🍐', '🍊', '🍋', '🍌'] },
-            { topic: 'Vegetables', pairs: 8, size: 4, emojis: ['🥦', '🥕', '🥔', '🌽', '🌶️', '🥒', '🧅', '🫑'] },
-            { topic: 'Transportation', pairs: 8, size: 4, emojis: ['🚗', '🚕', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒'] },
-            { topic: 'Sports', pairs: 8, size: 4, emojis: ['⚽️', '🏀', '🏈', '⚾️', '🎾', '🏐', '🏉', '🎱'] },
-            { topic: 'Weather', pairs: 10, size: 5, emojis: ['☀️', '☁️', '🌧️', '⚡️', '❄️', '🌈', '🌬️', '🌪️', '🌫️', '💧'] },
-            { topic: 'Planets', pairs: 10, size: 5, emojis: ['🪐', '🌍', '🌎', '🌏', '🌕', '🌖', '🌗', '🌘', '🌑', '🌚'] },
-            { topic: 'Emojis', pairs: 10, size: 5, emojis: ['😀', '😂', '🥳', '😎', '🤩', '😘', '🥺', '🤯', '😡', '🤢'] },
-            { topic: 'Clothing', pairs: 12, size: 6, emojis: ['👕', '👖', '👗', '👚', '🩳', '👙', '👔', '🩱', '🧦', '🧤', '🧣', '🎩'] },
-            { topic: 'Household Items', pairs: 12, size: 6, emojis: ['🛋️', '🪑', '🚽', '🪣', '🪥', '🧺', '🚪', '🛏️', '📺', '📻', '☎️', '📱'] },
-            { topic: 'Musical Instruments', pairs: 12, size: 6, emojis: ['🎸', '🥁', '🎷', '🎺', '🎻', '🎹', '🎼', '🎤', '🎧', '🎵', '🎶', '🥁'] },
-            { topic: 'Tools', pairs: 12, size: 6, emojis: ['🔨', '🔧', '🪚', '🔩', '⚙️', '⛓️', '🪛', '🪓', '🗜️', '⚖️', '🔪', '🗡️'] },
-            { topic: 'Sea Creatures', pairs: 15, size: 6, emojis: ['🐬', '🦈', '🐳', '🐡', '🐙', '🦑', '🦞', '🦀', '🦐', '🐠', '🐟', '🐚', '🌊', '🧜‍♀️', '💧'] },
-            { topic: 'Desserts', pairs: 15, size: 6, emojis: ['🍦', '🍧', '🍨', '🍩', '🍪', '🎂', '🍰', '🧁', '🍫', '🍬', '🍭', '🍮', '🍯', '🧇', '🥞'] },
-            { topic: 'Flowers', pairs: 15, size: 6, emojis: ['🌸', '🌺', '🌹', '🌻', '🌷', '🌼', '💐', '🥀', '🪷', '🪻', '💮', '🏵️', '🌿', '🌱', '🌵'] },
-            { topic: 'Trees', pairs: 18, size: 6, emojis: ['🌲', '🌳', '🌴', '🌳', '🌲', '🌳', '🌴', '🌳', '🌲', '🌳', '🌴', '🌳', '🌲', '🌳', '🌴', '🌳', '🌲', '🌳'] },
-            { topic: 'Electronics', pairs: 18, size: 6, emojis: ['💻', '🖥️', '⌨️', '🖱️', '🖲️', '💽', '💾', '💿', '📀', '📠', '📺', '📱', '🔋', '🔌', '💡', '🔦', '⏰', '🕰️'] },
-            { topic: 'Dinosaurs', pairs: 18, size: 6, emojis: ['🦖', '🦕', '🐉', '🐲', '🐊', '🦎', '🐍', '🐸', '🐢', '🦖', '🦕', '🐉', '🐲', '🐊', '🦎', '🐍', '🐸', '🐢'] },
-            { topic: 'Bugs', pairs: 18, size: 6, emojis: ['🐛', '🦋', '🐞', '🐝', '🐜', '🕷️', '🕸️', '🦗', '🦟', '🪰', '🪲', '🪳', '🦂', '🐌', '🦋', '🐛', '🐞', '🐝'] },
-            { topic: 'Space', pairs: 20, size: 8, emojis: ['🌌', '🌠', '🪐', '💫', '☄️', '🚀', '🛰️', '🛸', '👽', '👾', '🌟', '✨', '🪐', '🌠', '🌌', '💫', '☄️', '🚀', '🛰️', '🛸'] },
-            { topic: 'Fantasy Creatures', pairs: 20, size: 8, emojis: ['🦄', '🧙', '🧚', '🧞', '🧜‍♀️', '🧚‍♂️', '🧝‍♀️', '🧝‍♂️', '🧙‍♂️', '🧚‍♂️', '🦄', '🧙', '🧚', '🧞', '🧜‍♀️', '🧚‍♂️', '🧝‍♀️', '🧝‍♂️', '🧙‍♂️', '🧚‍♂️'] },
-            { topic: 'Gems', pairs: 20, size: 8, emojis: ['💎', '💍', '👑', '🔮', '🧿', '🪞', '🪅', '🎁', '🎀', '🎉', '💎', '💍', '👑', '🔮', '🧿', '🪞', '🪅', '🎁', '🎀', '🎉'] },
-            { topic: 'Flags', pairs: 20, size: 8, emojis: ['🏳️', '🏴', '🚩', '🎌', '🏁', '🇦🇨', '🇦🇩', '🇦🇪', '🇦🇫', '🇦🇬', '🇦🇮', '🇦🇱', '🇦🇲', '🇦🇴', '🇦🇶', '🇦🇷', '🇦🇸', '🇦🇹', '🇦🇺', '🇦🇼'] },
-            { topic: 'Superheroes', pairs: 20, size: 8, emojis: ['🦸', '🦸‍♂️', '🦸‍♀️', '🦹', '🦹‍♂️', '🦹‍♀️', '🧙‍♂️', '🧝‍♂️', '🧝‍♀️', '🧟‍♂️', '🧛‍♂️', '🧜‍♂️', '🧙‍♀️', '🧚‍♀️', '🧝', '🦹', '🦸', '🦸‍♂️', '🦸‍♀️', '🦹'] },
-            { topic: 'Food', pairs: 20, size: 8, emojis: ['🍔', '🍟', '🍕', '🌭', '🌮', '🌯', '🥙', '🥪', '🍞', '🥐', '🥖', '🥨', '🧀', '🥓', '🥚', '🍳', '🥞', '🧇', '🥩', '🍗'] }
+            { topic: 'Animals', pairs: 3, size: 3, emojis: ['🐶', '🐱', '🦁', '🐸', '🐘', '🦋'] },
+            { topic: 'Fruits', pairs: 3, size: 3, emojis: ['🍏', '🍎', '🍐', '🍊', '🍋', '🍌'] },
+            { topic: 'Vegetables', pairs: 3, size: 3, emojis: ['🥦', '🥕', '🥔', '🌽', '🌶️', '🥒'] },
+            { topic: 'Transportation', pairs: 3, size: 3, emojis: ['🚗', '🚕', '🚌', '🚎', '🏎️', '🚓'] },
+            { topic: 'Sports', pairs: 3, size: 3, emojis: ['⚽️', '🏀', '🏈', '⚾️', '🎾', '🏐'] },
+            { topic: 'Weather', pairs: 3, size: 3, emojis: ['☀️', '☁️', '🌧️', '⚡️', '❄️', '🌈'] },
+            { topic: 'Planets', pairs: 3, size: 3, emojis: ['🪐', '🌍', '🌎', '🌏', '🌕', '🌖'] },
+            { topic: 'Emojis', pairs: 3, size: 3, emojis: ['😀', '😂', '🥳', '😎', '🤩', '😘'] },
+            { topic: 'Clothing', pairs: 3, size: 3, emojis: ['👕', '👖', '👗', '👚', '🩳', '👙'] },
+            { topic: 'Household Items', pairs: 3, size: 3, emojis: ['🛋️', '🪑', '🚽', '🪣', '🪥', '🧺'] },
+            { topic: 'Musical Instruments', pairs: 3, size: 3, emojis: ['🎸', '🥁', '🎷', '🎺', '🎻', '🎹'] },
+            { topic: 'Tools', pairs: 3, size: 3, emojis: ['🔨', '🔧', '🪚', '🔩', '⚙️', '⛓️'] },
+            { topic: 'Sea Creatures', pairs: 3, size: 3, emojis: ['🐬', '🦈', '🐳', '🐡', '🐙', '🦑'] },
+            { topic: 'Desserts', pairs: 3, size: 3, emojis: ['🍦', '🍧', '🍨', '🍩', '🍪', '🎂'] },
+            { topic: 'Flowers', pairs: 3, size: 3, emojis: ['🌸', '🌺', '🌹', '🌻', '🌷', '🌼'] },
+            { topic: 'Trees', pairs: 3, size: 3, emojis: ['🌲', '🌳', '🌴', '🍂', '🍁', '🌿'] },
+            { topic: 'Electronics', pairs: 3, size: 3, emojis: ['💻', '🖥️', '⌨️', '🖱️', '🖲️', '💾'] },
+            { topic: 'Dinosaurs', pairs: 3, size: 3, emojis: ['🦖', '🦕', '🐉', '🐲', '🐊', '🦎'] },
+            { topic: 'Bugs', pairs: 3, size: 3, emojis: ['🐛', '🦋', '🐞', '🐝', '🐜', '🕷️'] },
+            { topic: 'Space', pairs: 3, size: 3, emojis: ['🌌', '🌠', '🪐', '💫', '☄️', '🚀'] },
+            { topic: 'Fantasy Creatures', pairs: 3, size: 3, emojis: ['🦄', '🧙', '🧚', '🧞', '🧜‍♀️', '🧚‍♂️'] },
+            { topic: 'Gems', pairs: 3, size: 3, emojis: ['💎', '💍', '👑', '🔮', '🧿', '🪞'] },
+            { topic: 'Flags', pairs: 3, size: 3, emojis: ['🏳️', '🏴', '🚩', '🎌', '🏁', '🇦🇨'] },
+            { topic: 'Superheroes', pairs: 3, size: 3, emojis: ['🦸', '🦸‍♂️', '🦸‍♀️', '🦹', '🦹‍♂️', '🦹‍♀️'] },
+            { topic: 'Food', pairs: 3, size: 3, emojis: ['🍔', '🍟', '🍕', '🌭', '🌮', '🌯'] }
         ];
-
+        
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -227,7 +233,6 @@
 
         function generateCards() {
             gameGrid.innerHTML = '';
-            cards = [];
             flippedCards = [];
             matchedPairs = 0;
             moves = 0;
@@ -236,15 +241,14 @@
             const config = levelConfigs[level - 1];
             topicTextElement.textContent = `Match all the '${config.topic.toLowerCase()}' pairs to clear the board!`;
             
-            const pairs = config.pairs;
-            const cardEmojis = config.emojis.slice(0, pairs);
+            const cardEmojis = config.emojis.slice(0, config.pairs);
             const gameEmojis = shuffle([...cardEmojis, ...cardEmojis]);
 
-            gameGrid.style.gridTemplateColumns = `repeat(${config.size}, 1fr)`;
+            gameGrid.style.gridTemplateColumns = `repeat(3, 1fr)`;
             
             gameEmojis.forEach((emoji, index) => {
                 const card = document.createElement('div');
-                card.classList.add('game-card', 'rounded-xl', 'transition-all');
+                card.classList.add('game-card', 'rounded-2xl', 'transition-all');
                 card.dataset.emoji = emoji;
                 
                 const cardFront = document.createElement('div');
@@ -262,13 +266,12 @@
 
                 card.addEventListener('click', flipCard);
                 gameGrid.appendChild(card);
-                cards.push(card);
             });
         }
 
         function flipCard(event) {
             const clickedCard = event.currentTarget;
-            if (isProcessing || clickedCard.classList.contains('flipped')) {
+            if (isProcessing || clickedCard.classList.contains('flipped') || clickedCard.classList.contains('matched')) {
                 return;
             }
 
@@ -290,7 +293,6 @@
             const [card1, card2] = flippedCards;
 
             if (card1.dataset.emoji === card2.dataset.emoji) {
-                // It's a match!
                 card1.classList.add('matched');
                 card2.classList.add('matched');
                 matchedPairs++;
@@ -299,14 +301,13 @@
                     endLevel();
                 }
             } else {
-                // No match, apply red color and then flip back
                 card1.classList.add('no-match');
                 card2.classList.add('no-match');
                 
                 setTimeout(() => {
                     card1.classList.remove('flipped', 'no-match');
                     card2.classList.remove('flipped', 'no-match');
-                }, 1000); // Keep the cards red for 1 second
+                }, 1000); 
             }
             flippedCards = [];
         }
@@ -357,7 +358,6 @@
 
         // Initial game start
         startGame();
-
     </script>
 </body>
 </html>
